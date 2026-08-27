@@ -8,7 +8,7 @@ class ModelManager:
     def __init__(self):
         self.neo = NeoClient()
         self.available_presets = []
-        self.current_presets = [None, None, None, None, None]
+        self.current_presets = [None] * 6
         self.chain_responses = []
         self.current_step = 0
         self.user_message = ""

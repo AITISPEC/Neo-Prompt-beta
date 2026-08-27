@@ -120,7 +120,8 @@ class NeoClient:
                 self.models_list = loaded_model_keys
                 return True
             return False
-        except Exception:
+        except (requests.exceptions.RequestException, ValueError, TypeError):
+            print("[DEBUG] LM Studio NOT FOUND")
             return False
 
     def _check_bionic(self):
@@ -161,7 +162,7 @@ class NeoClient:
             self.models_list = model_ids
             self.total_context = DEFAULT_CONTEXT_LENGTH
             return True
-        except Exception as e:
+        except (requests.exceptions.RequestException, ValueError, TypeError) as e:
             print(f"[DEBUG] Bionic exception: {e}")
             return False
 
@@ -296,7 +297,9 @@ class NeoClient:
             return "⚠️ Неизвестный тип сервера"
 
         try:
-            response = requests.post(url, headers=headers, json=request_body, timeout=600)
+            response = requests.post(
+                url, headers=headers, json=request_body, timeout=600
+            )
             data = response.json()
             if response.status_code == 200:
                 if data.get("usage"):
@@ -306,7 +309,9 @@ class NeoClient:
                     self.current_response_id = data["response_id"]
                 if data.get("choices") and len(data["choices"]) > 0:
                     content = data["choices"][0]["message"].get("content", "")
-                    reasoning = data["choices"][0]["message"].get("reasoning_content", "")
+                    reasoning = data["choices"][0]["message"].get(
+                        "reasoning_content", ""
+                    )
                     return {"content": content, "reasoning": reasoning}
                 return "⚠️ Пустой ответ"
             else:
@@ -314,8 +319,8 @@ class NeoClient:
                 if data.get("error"):
                     error_msg = data["error"].get("message", error_msg)
                 return f"⚠️ Ошибка: {error_msg}"
-        except Exception as e:
-            return f"⚠️ Ошибка: {str(e)}"
+        except (KeyError, TypeError, ValueError) as e:
+            return f"⚠️ Ошибка: {e}"
 
     def reset_chat(self):
         self.current_response_id = None

@@ -36,7 +36,7 @@ with gr.Blocks(title="Neo Prompt - 5 пресетов") as demo:
     preset_dropdowns = []
     preset_statuses = []
 
-    for i in range(5):
+    for i in range(6):
         with gr.Row():
             with gr.Column(scale=1):
                 gr.Markdown(f"**Шаг {i + 1}**")
@@ -72,7 +72,7 @@ with gr.Blocks(title="Neo Prompt - 5 пресетов") as demo:
             )
         with gr.Column(scale=2):
             step_counter = gr.Number(
-                label="Шаг:", value=0, minimum=0, maximum=5, interactive=False
+                label="Шаг:", value=0, minimum=0, maximum=6, interactive=False
             )
         with gr.Column(scale=2):
             next_step_btn = gr.Button(
@@ -141,9 +141,9 @@ with gr.Blocks(title="Neo Prompt - 5 пресетов") as demo:
         choices = manager.refresh_presets(presets_list)
         # Возвращаем только обновленные dropdown, статусы оставляем пустыми
         updates = []
-        for i in range(5):
+        for i in range(6):
             updates.append(gr.Dropdown(choices=choices))
-        for i in range(5):
+        for i in range(6):
             updates.append("")
         return updates
 
