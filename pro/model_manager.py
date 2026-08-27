@@ -1,6 +1,8 @@
 import gradio as gr
+
+from .formatters import format_response_display, format_thinking_display
 from .neo_client import NeoClient
-from .formatters import format_thinking_display, format_response_display
+
 
 class ModelManager:
     def __init__(self):
@@ -36,7 +38,7 @@ class ModelManager:
         for p in self.available_presets:
             display = f"{p['name']} ({p['file']})"
             if display == preset_display_name:
-                self.current_presets[slot_index] = p['id']
+                self.current_presets[slot_index] = p["id"]
                 return f"✅ Слот {slot_index + 1}: {p['name']}"
         return f"❌ Слот {slot_index + 1}: пресет не найден"
 
@@ -73,7 +75,16 @@ class ModelManager:
             history.append({"role": "user", "content": message})
             history.append({"role": "assistant", "content": display_content})
 
-            yield history, history, "", 0, gr.update(interactive=False), display_thinking, reasoning, display_content
+            yield (
+                history,
+                history,
+                "",
+                0,
+                gr.update(interactive=False),
+                display_thinking,
+                reasoning,
+                display_content,
+            )
             return
 
         current_input = message
@@ -83,35 +94,67 @@ class ModelManager:
             if preset_id is None:
                 continue
 
-            for partial_content, partial_reasoning, status in self.neo.send_message_with_preset_stream(
-                    current_input, preset_id, reset_context=self.always_new_chat
+            for (
+                partial_content,
+                partial_reasoning,
+                status,
+            ) in self.neo.send_message_with_preset_stream(
+                current_input, preset_id, reset_context=self.always_new_chat
             ):
                 if status == "error":
                     history.append({"role": "user", "content": message})
                     history.append({"role": "assistant", "content": partial_content})
-                    yield history, history, "", i + 1, gr.update(interactive=False), "", "", ""
+                    yield (
+                        history,
+                        history,
+                        "",
+                        i + 1,
+                        gr.update(interactive=False),
+                        "",
+                        "",
+                        "",
+                    )
                     return
 
                 if status == "thinking":
-                    display_thinking = format_thinking_display(partial_reasoning, is_final=False)
-                    yield history, history, "", i + 1, gr.update(
-                        interactive=False), display_thinking, partial_reasoning, partial_content
+                    display_thinking = format_thinking_display(
+                        partial_reasoning, is_final=False
+                    )
+                    yield (
+                        history,
+                        history,
+                        "",
+                        i + 1,
+                        gr.update(interactive=False),
+                        display_thinking,
+                        partial_reasoning,
+                        partial_content,
+                    )
                 else:  # final
                     current_input = partial_content
                     last_reasoning = partial_reasoning
-                    self.chain_responses.append({
-                        "content": current_input,
-                        "reasoning": last_reasoning
-                    })
+                    self.chain_responses.append(
+                        {"content": current_input, "reasoning": last_reasoning}
+                    )
                     # Здесь важно передать response_raw
                     display_content = format_response_display(current_input)
-                    display_thinking = format_thinking_display(last_reasoning, is_final=True)
+                    display_thinking = format_thinking_display(
+                        last_reasoning, is_final=True
+                    )
 
                     history.append({"role": "user", "content": message})
                     history.append({"role": "assistant", "content": display_content})
 
-                    yield history, history, "", i + 1, gr.update(
-                        interactive=False), display_thinking, last_reasoning, display_content
+                    yield (
+                        history,
+                        history,
+                        "",
+                        i + 1,
+                        gr.update(interactive=False),
+                        display_thinking,
+                        last_reasoning,
+                        display_content,
+                    )
                     return
 
         # Этот код вряд ли выполнится, но на всякий случай
@@ -121,8 +164,16 @@ class ModelManager:
         history.append({"role": "user", "content": message})
         history.append({"role": "assistant", "content": display_content})
 
-        yield history, history, "", active_count, gr.update(
-            interactive=False), display_thinking, last_reasoning, display_content
+        yield (
+            history,
+            history,
+            "",
+            active_count,
+            gr.update(interactive=False),
+            display_thinking,
+            last_reasoning,
+            display_content,
+        )
 
     def reset_chain(self):
         self.chain_responses = []
@@ -130,3 +181,8 @@ class ModelManager:
         self.user_message = ""
         self.neo.reset_chat()
         return [], [], ""
+
+    def get_preset_by_index(self, index):
+        if 0 <= index < len(self.available_presets):
+            return self.available_presets[index]
+        return None

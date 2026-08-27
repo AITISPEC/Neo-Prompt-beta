@@ -28,7 +28,8 @@ man/
 *.tmp
 *.bak
 *.swp
-*~
+*.sh
+*.bat
 
 # Файлы IDE
 .vscode/
@@ -52,6 +53,8 @@ pro/config_local.py
 *.json
 !preset.json
 *.pickle
+.pytest_cache/
+.ruff_cache/
 
 # Файлы OS
 .DS_Store
@@ -66,6 +69,7 @@ desktop.ini
 .tox/
 .coverage
 htmlcov/
+patch.md
 
 # Документация
 site/
@@ -77,3 +81,4 @@ site/
 # Результаты работы
 output/
 temp/
+tmp/

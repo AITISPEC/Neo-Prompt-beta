@@ -233,4 +233,4 @@ Write-Host "  or" -ForegroundColor Yellow
 Write-Host "    run.bat" -ForegroundColor White
 Write-Host "  and" -ForegroundColor Yellow
 Write-Host "    Then open http://127.0.0.1:7860" -ForegroundColor Gray
-Write-Host "`n=== Done ===" -ForegroundColor Magenta
+Read-Host  "`n=== Done ===" -ForegroundColor Magenta
